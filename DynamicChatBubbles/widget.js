@@ -25,6 +25,8 @@ const Widget = {
   pronounsCache: {},
   channel: {},
   service: '',
+  followCache: {},
+  followToken: '',
   globalEmotes: {},
 }
 
@@ -32,6 +34,12 @@ const PRONOUNS_API_BASE = 'https://pronouns.alejo.io/api'
 const PRONOUNS_API = {
   user: username => `${PRONOUNS_API_BASE}/users/${username}`,
   pronouns: `${PRONOUNS_API_BASE}/pronouns`,
+}
+
+const DEC_API_BASE = 'https://decapi.me/twitch'
+const DEC_API = {
+  followedSeconds: username =>
+    `${DEC_API_BASE}/followed/${Widget.channel.username}/${username}?token=${FieldData.followToken}&format=U`,
 }
 
 const GLOBAL_EMOTES = {
@@ -120,6 +128,7 @@ function loadFieldData(data) {
     'fixedWidth',
     'pronounsLowercase',
     'pronounsBadgeCustomColors',
+    'includeFollowers',
     'ffzGlobal',
     'bttvGlobal',
     'topEdge',
@@ -867,6 +876,42 @@ async function get(URL) {
     .catch(error => null)
 }
 
+async function getFollowDate(username) {
+  let followData = Widget.followCache[username]
+
+  if (!followData || followData.expire < Date.now()) {
+    const data = await get(DEC_API.followedSeconds(username))
+    const seconds = parseInt(data)
+    if (isNaN(seconds)) return null
+
+    date = new Date(seconds * 1000) // convert to milliseconds then date
+
+    Widget.followCache[username] = {
+      date,
+      expire: Date.now() + 1000 * 60 * 60, // 1 hour in the future
+    }
+    followData = Widget.followCache[username]
+  }
+
+  return followData.date
+}
+
+async function followCheck(username) {
+  if (
+    Widget.service !== 'twitch' || // only works on twitch
+    Widget.channel.username.toLowerCase() === username.toLowerCase() // is broadcaster
+  ) {
+    return true
+  }
+
+  const followDate = await getFollowDate(username)
+  if (!followDate) return false
+
+  // convert minFollowTime from days to milliseconds
+  const minFollowTime = 1000 * 60 * 60 * 24 * FieldData.minFollowTime
+  return Date.now() - followDate >= minFollowTime
+}
+
 function hasIgnoredPrefix(text) {
   for (const prefix of FieldData.ignorePrefixList) {
     if (text.startsWith(prefix)) return true
@@ -895,6 +940,14 @@ async function hasIncludedBadge(badges = [], username) {
   if (FieldData.includeEveryone) return true
 
   const includedBadges = ['broadcaster']
+
+  if (FieldData.includeFollowers) {
+    includedBadges.push('follower')
+    const isFollower = await followCheck(username)
+    if (isFollower) {
+      codeBadges.push({ type: 'follower' })
+    }
+  }
 
   if (!codeBadges.length) return false
 
