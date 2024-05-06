@@ -572,10 +572,31 @@ main.direction-top main.random-mode {
 
 /* --- [Message Parts] --- */
 
+.emoteBox {
+  position: relative;
+  vertical-align: middle;
+  text-align: center;
+  margin: -.25rem 0;
+  display: inline-block;
+  height: 112px;
+}
+
 .emote {
   position: relative;
   vertical-align: middle;
   margin: -.25rem 0;
+}
+
+.emoteBox .emote {
+  margin: 0;
+}
+
+.emote.zwe {
+  z-index: 1;
+  position: absolute;
+  object-fit: {fillZWE};
+  left: 0;
+  width: 100%;
 }
 
 .dynamic .text, .dynamic .emote { animation: fadeMessage 1.5s; }
@@ -583,6 +604,10 @@ main.direction-top main.random-mode {
 .emote-1 .emote { height: 1.75rem; max-height: 112px; }
 .emote-2 .emote { height: 3.5rem; max-height: 112px; }
 .emote-4 .emote { height: 112px; }
+
+.emote-1 .emoteBox { height: 1.75rem; max-height: 112px; }
+.emote-2 .emoteBox { height: 3.5rem; max-height: 112px; }
+.emote-4 .emoteBox { height: 112px; }
 
 /* --- [Message Types] --- */
 

@@ -29,6 +29,8 @@ const Widget = {
   followToken: '',
   giftCache: [],
   globalEmotes: {},
+  zweEmotes: {},
+  modEmotes: {},
 }
 
 const PRONOUNS_API_BASE = 'https://pronouns.alejo.io/api'
@@ -88,6 +90,78 @@ const GLOBAL_EMOTES = {
   },
 }
 
+const ZWE_EMOTES = {
+  bttv: {
+    api: 'https://api.betterttv.net/3/cached/emotes/global',
+    transformer: response => {
+      const emoteNames = []
+      const bttvZWE = [
+       '567b5b520e984428652809b6', //SoSnowy
+       '5849c9a4f52be01a7ee5f79d', //IceCold
+       '58487cc6f52be01a7ee5f205', //SantaHat
+       '5849c9c8f52be01a7ee5f79e', //TopHat
+       '567b5dc00e984428652809bd', //ReinDeer
+       '567b5c080e984428652809ba', //CandyCane
+       '5e76d399d6581c3724c0f0b8', //cvMask
+       '5e76d338d6581c3724c0f0b2'  //cvHazmat
+      ]
+      for (const emote of response)
+      {
+        if (emote.modifier)
+          continue
+        if (bttvZWE.includes(emote.id))
+          emoteNames.push(emote.code)
+      }
+      return emoteNames
+    },
+  },
+  '7tv': {
+    api: 'https://7tv.io/v3/emote-sets/global',
+    transformer: response => {
+      const emoteNames = []
+      for (const emote of response.emotes)
+      {
+        if ((emote.data.flags & 0x100) !== 0x100)
+          continue
+        emoteNames.push(emote.name)
+      }
+      return emoteNames
+    },
+  },
+}
+
+const MODIFIER_EMOTES = {
+  ffz: {
+    api: 'https://api2.frankerfacez.com/v1/set/global',
+    transformer: response => {
+      const { default_sets, sets } = response
+      const emoteNames = []
+      for (const set of default_sets) {
+        const { emoticons } = sets[set]
+        for (const emote of emoticons) {
+          if (!emote.modifier)
+            continue
+          emoteNames.push(emote.name)
+        }
+      }
+      return emoteNames
+    },
+  },
+  bttv: {
+    api: 'https://api.betterttv.net/3/cached/emotes/global',
+    transformer: response => {
+      const emoteNames = []
+      for (const emote of response)
+      {
+        if (!emote.modifier)
+          continue
+        emoteNames.push(emote.code)
+      }
+      return emoteNames
+    },
+  },
+}
+
 // ---------------------------
 //    Widget Initialization
 // ---------------------------
@@ -96,6 +170,8 @@ window.addEventListener('onWidgetLoad', async obj => {
   Widget.channel = obj.detail.channel
   loadFieldData(obj.detail.fieldData)
   loadGlobalEmotes()
+  loadZWEEmotes()
+  loadModEmotes()
 
   const { isEditorMode } = await SE_API.getOverlayStatus()
   conditionalMainClass('editor', isEditorMode)
@@ -274,6 +350,26 @@ async function loadGlobalEmotes() {
     const response = await get(api)
     if (response != null) {
       Widget.globalEmotes[key] = transformer(response)
+    }
+  }
+}
+
+async function loadZWEEmotes() {
+  for (const [key, value] of Object.entries(ZWE_EMOTES)) {
+    const { api, transformer } = value
+    const response = await get(api)
+    if (response != null) {
+      Widget.zweEmotes[key] = transformer(response)
+    }
+  }
+}
+
+async function loadModEmotes() {
+  for (const [key, value] of Object.entries(MODIFIER_EMOTES)) {
+    const { api, transformer } = value
+    const response = await get(api)
+    if (response != null) {
+      Widget.modEmotes[key] = transformer(response)
     }
   }
 }
@@ -863,15 +959,33 @@ function BubbleComponent(props) {
   // based on https://stackoverflow.com/a/69869976
   const isDark = tColor.getLuminance() < 0.4
 
-  const parsedElements = parsedText.map(({ type, data }) => {
+  const parsedElements = []
+  for (let i = 0, l = parsedText.length; i < l; i++) {
+    let { type, data } = parsedText[i]
     switch (type) {
       case 'emote':
-        return EmoteComponent(data)
+        parsedElements.push(EmoteComponent(data))
+        break
+      case 'zwe':
+        if (i < 2)
+          parsedElements.push(EmoteComponent(data))
+        else if (parsedText[i - 1].type === 'text' &&
+                 parsedText[i - 1].data === ' ' &&
+                 (parsedText[i - 2].type === 'emote' || parsedText[i - 2].type === 'zwe')) {
+          parsedElements.pop()
+          parsedElements.push(wrapZWE(parsedElements.pop(), data))
+        }else
+          parsedElements.push(EmoteComponent(data))
+        break
+      case 'modifier':
+        //return TextComponent('')
+        break
       case 'text':
       default:
-        return TextComponent(data)
+        parsedElements.push(TextComponent(data))
+        break
     }
-  })
+  }
 
   let containerClasses = [
     'bubble',
@@ -949,6 +1063,12 @@ function BubbleComponent(props) {
   })
 }
 
+function wrapZWE(htm, zwe) {
+  if (htm.slice(0, 6) === '<span ')
+    return htm.slice(0, -7) + ZWEComponent(zwe) + htm.slice(-7)
+  return '<span class=\'emoteBox\'>' + htm + ZWEComponent(zwe) + '</span>'
+}
+
 function BadgesComponent(badges) {
   return badges.map(badge =>
     Component('img', { class: 'badge', src: badge.url, alt: badge.type }),
@@ -964,6 +1084,13 @@ function EmoteComponent({ urls, name }) {
   if (!url) url = urls[2]
   if (!url) url = urls[1]
   return Component('img', { class: ['emote'], src: url, alt: name })
+}
+
+function ZWEComponent({ urls, name }) {
+  let url = urls[4]
+  if (!url) url = urls[2]
+  if (!url) url = urls[1]
+  return Component('img', { class: ['emote zwe'], src: url, alt: name })
 }
 
 const ClassComponent =
@@ -1218,18 +1345,17 @@ function parse(text, emotes) {
 
   const parsedText = textObjs.reduce((acc, textObj, index) => {
     const emoteData = filteredEmotes[index]
-    if (emoteData.type === 'twitch') {
-      emoteData.urls[
-        '1'
-      ] = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteData.id}/default/light/1.0`
-      emoteData.urls[
-        '2'
-      ] = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteData.id}/default/light/2.0`
-      emoteData.urls[
-        '4'
-      ] = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteData.id}/default/light/3.0`
-    }
-    return [...acc, textObj, { type: 'emote', data: emoteData }]
+    let eT = 'emote'
+    
+    const zweEmotes = Widget.zweEmotes[emoteData.type]
+    if (!!zweEmotes && zweEmotes.includes(emoteData.name))
+     eT = 'zwe'
+    
+    const modEmotes = Widget.modEmotes[emoteData.type]
+    if (!!modEmotes && modEmotes.includes(emoteData.name))
+     eT = 'modifier'
+    
+    return [...acc, textObj, { type: eT, data: emoteData }]
   }, [])
 
   parsedText.push(last)
@@ -1241,6 +1367,8 @@ function calcEmoteSize(parsedText) {
   for (const { type, data } of parsedText) {
     if (type === 'emote') {
       emotesFound++
+    } else if (type === 'zwe' || type === 'modifier') {
+      continue
     } else if (data.trim() !== '') return 1
   }
   if (emotesFound > 1) return 2

@@ -500,6 +500,16 @@
       "false": "No"
     }
   },
+  "fillZWE": {
+    "label": "Fill zero-width emotes?",
+    "group": "Emotes",
+    "type": "dropdown",
+    "value": "contain",
+    "options": {
+      "fill": "Yes",
+      "contain": "No"
+    }
+  },
   "ignoreFirst": {
     "label": "Hide first-time chat messages?",
     "group": "Message Filters",
