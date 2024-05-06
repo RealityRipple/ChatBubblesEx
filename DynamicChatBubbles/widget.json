@@ -582,6 +582,36 @@
     "step": 1,
     "min": 0
   },
+  "eventFollow": {
+    "label": "Show follow events?",
+    "group": "Event Filters",
+    "type": "dropdown",
+    "value": "false",
+    "options": {
+      "true": "Yes",
+      "false": "No"
+    }
+  },
+  "eventSub": {
+    "label": "Show subscription events?",
+    "group": "Event Filters",
+    "type": "dropdown",
+    "value": "false",
+    "options": {
+      "true": "Yes",
+      "false": "No"
+    }
+  },
+  "eventGiftSub": {
+    "label": "Show gift sub events?",
+    "group": "Event Filters",
+    "type": "dropdown",
+    "value": "false",
+    "options": {
+      "true": "Yes",
+      "false": "No"
+    }
+  },
   "includeEveryone": {
     "label": "Show messages from everyone?",
     "group": "User Filters",

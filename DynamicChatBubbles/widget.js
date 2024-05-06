@@ -27,6 +27,7 @@ const Widget = {
   service: '',
   followCache: {},
   followToken: '',
+  giftCache: [],
   globalEmotes: {},
 }
 
@@ -128,6 +129,9 @@ function loadFieldData(data) {
     'fixedWidth',
     'pronounsLowercase',
     'pronounsBadgeCustomColors',
+    'eventFollow',
+    'eventSub',
+    'eventGiftSub',
     'includeFollowers',
     'ffzGlobal',
     'bttvGlobal',
@@ -269,6 +273,9 @@ window.addEventListener('onEventReceived', obj => {
       break
     case 'delete-messages':
       deleteMessages(event.userId)
+      break
+    case 'event':
+      onEvent(event)
       break
     case 'event:test':
       onButton(event)
@@ -564,6 +571,148 @@ function deleteMessages(userId) {
   }
 
   $(selector).remove()
+}
+
+function onEvent(event) {
+  switch (event.type) {
+    case 'follow':
+     onEventFollow(event)
+     break
+    case 'subscriber':
+     if (event.data.hasOwnProperty('sender'))
+       onEventGiftSub(event)
+     else
+       onEventSub(event)
+     break
+    case 'communityGiftPurchase':
+     onEventBulkGiftSub(event)
+     break
+  }
+}
+
+function onEventFollow(event) {
+  if (!FieldData.eventFollow)
+    return
+  const evRet = {
+    data: {
+      userId: event.data.username,
+      tags: {
+       'msg-id': 'highlighted-message',
+      },
+      text: event.data.displayName + ' is now a follower!',
+      displayName: 'New Follow',
+      nick: event.data.username,
+      msgId: event.activityId,
+      badges: [],
+      isAction: true,
+    },
+  }
+  onMessage(evRet, true)
+}
+
+function onEventSub(event) {
+  if (!FieldData.eventSub)
+    return
+  const evRet = {
+    data: {
+      userId: event.data.username,
+      tags: {
+       'msg-id': 'highlighted-message',
+      },
+      text: 'A user has subscribed!',
+      displayName: 'Sub',
+      nick: event.data.username,
+      msgId: event.activityId,
+      badges: [],
+      isAction: true,
+    },
+  }
+  let tier = ''
+  if (event.data.tier === 2000)
+    tier = ' at Tier 2'
+  else if (event.data.tier === 3000)
+    tier = ' at Tier 3'
+  else if (event.data.tier === 'Prime')
+    tier = ' with Prime'
+  if (event.data.amount > 1) {
+    evRet.data.text = event.data.displayName + ' has resubscribed' + tier + ' for ' + event.data.amount + ' months!'
+    evRet.data.displayName = 'Resub'
+  } else {
+    evRet.data.text = event.data.displayName + ' has subscribed' + tier + '!'
+    evRet.data.displayName = 'New Sub'
+  }
+  onMessage(evRet)
+  if (event.data.hasOwnProperty('message') && event.data.message !== '') {
+    evRet.data.displayName = event.data.displayName
+    evRet.data.text = event.data.message
+    onMessage(evRet)
+  }
+}
+
+function onEventGiftSub(event) {
+  if (!FieldData.eventGiftSub)
+    return
+  if (event.hasOwnProperty('activityGroup') && Widget.giftCache.includes(event.activityGroup))
+    return
+  const evRet = {
+    data: {
+      userId: event.data.sender,
+      tags: {
+       'msg-id': 'highlighted-message',
+      },
+      text: 'A user has gifted a sub!',
+      displayName: 'Gift Sub',
+      nick: event.data.sender,
+      msgId: event.activityId,
+      badges: [],
+      isAction: true,
+    },
+  }
+  if (event.data.hasOwnProperty('message') && event.data.message !== '') {
+    evRet.data.text = event.data.message
+    onMessage(evRet)
+    return
+  }
+  let tier = ''
+  if (event.data.tier === 2000)
+    tier = ' Tier 2'
+  else if (event.data.tier === 3000)
+    tier = ' Tier 3'
+  if (event.data.amount > 1)
+    evRet.data.text = (event.data.sender || 'Anonymous') + ' gifted a' + tier + ' sub to ' + event.data.displayName + ' for ' + event.data.amount + ' months!'
+  else
+    evRet.data.text = (event.data.sender || 'Anonymous') + ' gifted a' + tier + ' sub to ' + event.data.displayName + '!'
+  onMessage(evRet)
+}
+
+function onEventBulkGiftSub(event) {
+  if (!FieldData.eventGiftSub)
+    return
+  Widget.giftCache.push(event.activityGroup)
+  const evRet = {
+    data: {
+      userId: event.data.username,
+      tags: {
+       'msg-id': 'highlighted-message',
+      },
+      text: 'A user has gifted subs!',
+      displayName: 'Gift Sub',
+      nick: event.data.username,
+      msgId: event.activityId,
+      badges: [],
+      isAction: true,
+    },
+  }
+  let tier = ''
+  if (event.data.tier === 2000)
+    tier = ' Tier 2'
+  else if (event.data.tier === 3000)
+    tier = ' Tier 3'
+  if (event.data.amount > 1)
+    evRet.data.text = (event.data.displayName || 'Anonymous') + ' has gifted ' + event.data.amount + tier + ' subs!'
+  else
+    evRet.data.text = (event.data.displayName || 'Anonymous') + ' has gifted a' + tier + ' sub!'
+  onMessage(evRet)
 }
 
 function onButton(event) {
