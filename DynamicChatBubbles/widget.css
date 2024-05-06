@@ -620,7 +620,8 @@ main.direction-top main.random-mode {
 }
 
 .highlight .text {
-  color: #000B;
+  text-shadow: 2px 2px 3px #000;
+  font-size: 110%;
 }
 
 .action .text {
