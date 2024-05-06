@@ -490,6 +490,16 @@
       "false": "No"
     }
   },
+  "7tvGlobal": {
+    "label": "Show global 7TV emotes?",
+    "group": "Emotes",
+    "type": "dropdown",
+    "value": "false",
+    "options": {
+      "true": "Yes",
+      "false": "No"
+    }
+  },
   "ignoreFirst": {
     "label": "Hide first-time chat messages?",
     "group": "Message Filters",

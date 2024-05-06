@@ -52,6 +52,8 @@ const GLOBAL_EMOTES = {
       for (const set of default_sets) {
         const { emoticons } = sets[set]
         for (const emote of emoticons) {
+          if (emote.modifier)
+            continue
           emoteNames.push(emote.name)
         }
       }
@@ -61,7 +63,27 @@ const GLOBAL_EMOTES = {
   bttv: {
     api: 'https://api.betterttv.net/3/cached/emotes/global',
     transformer: response => {
-      return response.map(emote => emote.code)
+      const emoteNames = []
+      for (const emote of response)
+      {
+        if (emote.modifier)
+          continue
+        emoteNames.push(emote.code)
+      }
+      return emoteNames
+    },
+  },
+  '7tv': {
+    api: 'https://7tv.io/v3/emote-sets/global',
+    transformer: response => {
+      const emoteNames = []
+      for (const emote of response.emotes)
+      {
+        if ((emote.data.flags & 0x100) === 0x100)
+          continue
+        emoteNames.push(emote.name)
+      }
+      return emoteNames
     },
   },
 }
@@ -135,6 +157,7 @@ function loadFieldData(data) {
     'includeFollowers',
     'ffzGlobal',
     'bttvGlobal',
+    '7tvGlobal',
     'topEdge',
     'bottomEdge',
     'leftEdge',
@@ -1169,11 +1192,10 @@ function parse(text, emotes) {
   const filteredEmotes = emotes.filter(emote => {
     const { name, type } = emote
 
-    if (!['twitch', 'ffz', 'bttv', 'sticker'].includes(type)) return false
-
     if (
       (type === 'ffz' && FieldData.ffzGlobal) ||
-      (type === 'bttv' && FieldData.bttvGlobal)
+      (type === 'bttv' && FieldData.bttvGlobal) ||
+      (type === '7tv' && FieldData['7tvGlobal'])
     )
       return true
 
@@ -1434,24 +1456,6 @@ const TEST_MESSAGES = [
     ],
   ],
   [
-    'SCREME',
-    [
-      {
-        type: 'bttv',
-        name: 'SCREME',
-        id: '5fea41766b06e834ffd76103',
-        gif: true,
-        urls: {
-          1: 'https://cdn.betterttv.net/emote/5fea41766b06e834ffd76103/1x',
-          2: 'https://cdn.betterttv.net/emote/5fea41766b06e834ffd76103/2x',
-          4: 'https://cdn.betterttv.net/emote/5fea41766b06e834ffd76103/3x',
-        },
-        start: 0,
-        end: 6,
-      },
-    ],
-  ],
-  [
     'toad sings but make it nightcore zaytriSCREME',
     [
       {
@@ -1528,6 +1532,24 @@ const TEST_MESSAGES = [
         },
         start: 0,
         end: 8,
+      },
+    ],
+  ],
+  [
+    'Head gachiBASS Bang',
+    [
+      {
+        type: '7tv',
+        name: 'gachiBASS',
+        id: '63047304b9163843cddda6e0',
+        gif: true,
+        urls: {
+          1: 'https://cdn.7tv.app/emote/63047304b9163843cddda6e0/1x.webp',
+          2: 'https://cdn.7tv.app/emote/63047304b9163843cddda6e0/2x.webp',
+          4: 'https://cdn.7tv.app/emote/63047304b9163843cddda6e0/4x.webp',
+        },
+        start: 5,
+        end: 14,
       },
     ],
   ],
