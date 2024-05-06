@@ -382,6 +382,20 @@
     "type": "colorpicker",
     "value": "#000000"
   },
+  "backgroundOpacityLabel": {
+    "label": "Background Transparency",
+    "group": "Custom Colors",
+    "type": "hidden"
+  },
+  "backgroundOpacity": {
+    "label": "Opacity",
+    "group": "Custom Colors",
+    "type": "slider",
+    "value": 87,
+    "step": 1,
+    "min": 0,
+    "max": 100
+  },
   "pronounsInfo": {
     "label": "Integrated from pronouns.alejo.io",
     "group": "Pronouns",
