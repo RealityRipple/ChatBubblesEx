@@ -837,7 +837,7 @@ function onEventBulkGiftSub(event) {
 function onButton(event) {
   const { listener, field, value } = event
 
-  if (listener !== 'widget-button' || value !== 'zaytri_dynamicchatbubbles')
+  if (listener !== 'widget-button' || value !== 'chatbubbletest')
     return
 
   switch (field) {

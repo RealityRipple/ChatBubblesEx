@@ -1,9 +1,17 @@
-# StreamElements Widgets by Zaytri
-Hi! Feel free to check out the code of my various custom stream widgets.
+# Chat Bubbles Ex
+A modification of Zaytri's Dynamic Chat Bubbles, supporting 7TV, Zero-Width Emotes, Chat Events such as Follows and Subscriptions, and other improvements.
 
-## Widget List
-- [Animated Gradient Frame](AnimatedGradientFrame)
-- [Chat Leaderboard](LevelUp)
-- [Dynamic Chat Bubbles](DynamicChatBubbles)
+## Features
+- Everything in [Chat Bubbles](https://github.com/zaytri/stream-elements-widgets) plus:
+- Bubble opacity setting (currently only fully functional in Animal-Crossing theme) 
+- Text-shadow on highlighted messages
+- "Message from Follower" support (requires an OAuth2 token)
+- Follow events
+- Subscription and gift events
+- 7TV emotes (with the option to disable global 7TV emotes)
+- Zero-Width emote overlapping (with the option to show centered or stretched)
+- Hidden FFZ and BTTV modifiers
 
-You can see all of them in action on my Twitch! https://www.twitch.tv/zaytri
+## Future
+- Emote modifier support
+- Raid events

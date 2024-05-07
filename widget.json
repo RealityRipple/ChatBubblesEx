@@ -3,7 +3,7 @@
     "label": "Send Test Message",
     "group": "Preview",
     "type": "button",
-    "value": "zaytri_dynamicchatbubbles"
+    "value": "chatbubbletest"
   },
   "previewModeLabel": {
     "label": "Preview Mode",
@@ -1183,38 +1183,28 @@
       "action": "Action (/me)"
     }
   },
-  "help": {
-    "label": "https://youtu.be/RbG10UmKaqM",
-    "group": "Help",
-    "type": "hidden"
-  },
   "widgetName": {
-    "label": "[Chat Bubbles Ex - v2.13.1]",
+    "label": "Chat Bubbles Ex",
     "group": "About",
     "type": "hidden",
     "value": "Chat Bubbles Ex"
   },
-  "widgetAuthor": {
-    "label": "Created by Zaytri",
-    "group": "About",
-    "type": "hidden",
-    "value": "Zaytri"
-  },
   "widgetVersion": {
-    "label": "Twitch - twitch.tv/zaytri",
+    "label": "v2.13.1",
     "group": "About",
     "type": "hidden",
     "value": "2.13.1"
   },
-  "widgetUpdateUrl": {
-    "label": "Twitter / TikTok / Instagram - @imzaytri",
+  "widgetAuthor": {
+    "label": "Modified by RealityRipple",
     "group": "About",
     "type": "hidden",
-    "value": "https://github.com/zaytri/stream-elements-widgets/blob/main/DynamicChatBubbles"
+    "value": "RealityRipple"
   },
-  "widgetMore": {
-    "label": "More Widgets by Zaytri - zaytri.com",
+  "widgetUpdateUrl": {
+    "label": "Originally created by Zaytri",
     "group": "About",
-    "type": "hidden"
+    "type": "hidden",
+    "value": "https://github.com/RealityRipple/ChatBubblesEx"
   }
 }
