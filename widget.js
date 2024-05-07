@@ -697,20 +697,20 @@ function deleteMessages(userId) {
 function onEvent(event) {
   switch (event.type) {
     case 'follow':
-     onEventFollow(event)
-     break
+      onEventFollow(event)
+      break
     case 'subscriber':
-     if (event.data.hasOwnProperty('sender'))
-       onEventGiftSub(event)
-     else
-       onEventSub(event)
-     break
+      if (event.data.hasOwnProperty('sender'))
+        onEventGiftSub(event)
+      else
+        onEventSub(event)
+      break
     case 'communityGiftPurchase':
-     onEventBulkGiftSub(event)
-     break
+      onEventBulkGiftSub(event)
+      break
     case 'raid':
-     onEventRaid(event)
-     break
+      onEventRaid(event)
+      break
   }
 }
 
