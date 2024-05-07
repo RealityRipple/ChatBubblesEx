@@ -243,6 +243,8 @@ function loadFieldData(data) {
 
   processFieldData(value => (value ? value : 1), 'delay')
 
+  processFieldData(value => (value ? parseInt(value, 10) : 0), 'eventRaid')
+
   const soundData = {}
   for (let i = 1; i <= 10; i++) {
     const group = FieldData[`soundGroup${i}`]
@@ -706,6 +708,9 @@ function onEvent(event) {
     case 'communityGiftPurchase':
      onEventBulkGiftSub(event)
      break
+    case 'raid':
+     onEventRaid(event)
+     break
   }
 }
 
@@ -831,6 +836,30 @@ function onEventBulkGiftSub(event) {
     evRet.data.text = (event.data.displayName || 'Anonymous') + ' has gifted ' + event.data.amount + tier + ' subs!'
   else
     evRet.data.text = (event.data.displayName || 'Anonymous') + ' has gifted a' + tier + ' sub!'
+  onMessage(evRet)
+}
+
+function onEventRaid(event) {
+  if (!FieldData.eventRaid)
+    return
+  if (event.data.amount < FieldData.eventRaid)
+    return
+  const evRet = {
+    data: {
+      userId: event.data.username,
+      tags: {
+       'msg-id': 'highlighted-message',
+      },
+      text: event.data.displayName + ' is raiding!',
+      displayName: 'Raid',
+      nick: event.data.username,
+      msgId: event.activityId,
+      badges: [],
+      isAction: true,
+    },
+  }
+  if (event.data.amount > 1)
+    evRet.data.text = event.data.displayName + ' is raiding with ' + event.data.amount + ' viewers!'
   onMessage(evRet)
 }
 

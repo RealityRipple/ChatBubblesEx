@@ -632,6 +632,18 @@
       "false": "No"
     }
   },
+  "eventRaid": {
+    "label": "Show raid events?",
+    "group": "Event Filters",
+    "type": "dropdown",
+    "value": "0",
+    "options": {
+      "5": "At least five raiders",
+      "2": "At least two raiders",
+      "1": "All raids",
+      "0": "No"
+    }
+  },
   "includeEveryone": {
     "label": "Show messages from everyone?",
     "group": "User Filters",
