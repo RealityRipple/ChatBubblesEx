@@ -726,7 +726,7 @@ function onEventFollow(event) {
       isAction: true,
     },
   }
-  onMessage(evRet, true)
+  onMessage(evRet)
 }
 
 function onEventSub(event) {
