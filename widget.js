@@ -1026,28 +1026,61 @@ function BubbleComponent(props) {
   const isDark = tColor.getLuminance() < 0.4
 
   const parsedElements = []
+  let stackMods = []
   for (let i = 0, l = parsedText.length; i < l; i++) {
     let { type, data } = parsedText[i]
     switch (type) {
       case 'emote':
-        parsedElements.push(EmoteComponent(data))
+        if (stackMods.length > 0) {
+          parsedElements.push(setModifierBTTV(EmoteComponent(data), stackMods))
+          stackMods = []
+        } else
+          parsedElements.push(EmoteComponent(data))
         break
       case 'zwe':
         if (i < 2)
           parsedElements.push(EmoteComponent(data))
         else if (parsedText[i - 1].type === 'text' &&
                  parsedText[i - 1].data === ' ' &&
-                 (parsedText[i - 2].type === 'emote' || parsedText[i - 2].type === 'zwe')) {
+                 (parsedText[i - 2].type === 'emote' ||
+                  parsedText[i - 2].type === 'zwe' ||
+                  parsedText[i - 2].type === 'modifier')) {
           parsedElements.pop()
           parsedElements.push(wrapZWE(parsedElements.pop(), data))
         }else
           parsedElements.push(EmoteComponent(data))
         break
       case 'modifier':
-        //return TextComponent('')
+        if (parsedText[i].data.type === 'bttv') {
+          if (i - 1 >= parsedText.length)
+            parsedElements.push(EmoteComponent(data))
+          else if (parsedText[i + 1].type === 'text' &&
+                   parsedText[i + 1].data === ' ' &&
+                   (parsedText[i + 2].type === 'emote' || parsedText[i + 2].type === 'zwe' || parsedText[i + 2].type === 'modifier')) {
+            if (parsedElements.length > 0 & data.name === 'z!' && parsedElements[parsedElements.length - 1] === '<span class=\'text\'> </span>') {
+              parsedElements.pop()
+            }
+            stackMods.push(data)
+          } else {
+            parsedElements.push(EmoteComponent(data))
+          }
+        } else if (parsedText[i].data.type === 'ffz') {
+          if (i < 2)
+            parsedElements.push(EmoteComponent(data))
+          else if (parsedText[i - 1].type === 'text' &&
+                   parsedText[i - 1].data === ' ' &&
+                   (parsedText[i - 2].type === 'emote' || parsedText[i - 2].type === 'zwe' || parsedText[i - 2].type === 'modifier')) {
+            parsedElements.pop()
+            parsedElements.push(setModifierFFZ(parsedElements.pop(), data))
+          } else {
+            parsedElements.push(EmoteComponent(data))
+          }
+        }
         break
       case 'text':
       default:
+        if (stackMods.length > 0 && data === ' ')
+          continue
         parsedElements.push(TextComponent(data))
         break
     }
@@ -1133,6 +1166,29 @@ function wrapZWE(htm, zwe) {
   if (htm.slice(0, 6) === '<span ')
     return htm.slice(0, -7) + ZWEComponent(zwe) + htm.slice(-7)
   return '<span class=\'emoteBox\'>' + htm + ZWEComponent(zwe) + '</span>'
+}
+
+function setModifierFFZ(htm, mod) {
+  return '<span class=\'mod-' + mod.name + '\'>' + htm + '</span>'
+}
+
+function setModifierBTTV(htm, mods) {
+  let m = []
+  for (const mod of mods) {
+    if (!m.includes('mod-bttv-' + mod.name.slice(0, -1)))
+      m.push('mod-bttv-' + mod.name.slice(0, -1))
+  }
+  if (m.length < 1)
+    return htm
+  let r = ''
+  for (let i = 0; i < m.length; i++) {
+    r += '<span class=\'' + m[i] + '\'>'
+  }
+  r += htm
+  for (let i = 0; i < m.length; i++) {
+    r += '</span>'
+  }
+  return r
 }
 
 function BadgesComponent(badges) {

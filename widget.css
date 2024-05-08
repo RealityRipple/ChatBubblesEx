@@ -784,3 +784,126 @@ main.direction-top main.random-mode {
   }
   70% { max-height: {maxHeight}px; }
 }
+
+
+/* --- [Emote Modifiers] --- */
+
+.mod-ffzX {
+	 transform: scaleX(-1);
+  display: inline-block;
+}
+
+.mod-ffzY {
+	 transform: scaleY(-1);
+  display: inline-block;
+}
+
+.emote-1 .mod-ffzW { min-width: 3.5rem; }
+.emote-2 .mod-ffzW { min-width: 7rem; }
+.emote-4 .mod-ffzW { min-width: 224px; }
+
+.mod-ffzCursed {
+	 filter: grayscale(1) brightness(0.7) contrast(2.5);
+}
+
+
+.emote-1 .mod-bttv-w img { min-width: 3.5rem; }
+.emote-2 .mod-bttv-w img { min-width: 7rem; }
+.emote-4 .mod-bttv-w img { min-width: 224px; }
+
+.mod-bttv-h {
+  transform: scaleX(-1);
+  display: inline-block;
+}
+
+.mod-bttv-v {
+  transform: scaleY(-1);
+  display: inline-block;
+}
+
+.emote-1 .mod-bttv-l img, .emote-1 .mod-bttv-r img { min-width: 1.75rem; max-width: 1.75rem; object-fit: contain; }
+.emote-2 .mod-bttv-l img, .emote-2 .mod-bttv-r img { min-width: 3.5rem; max-width: 3.5rem; object-fit: contain; }
+.emote-4 .mod-bttv-l img, .emote-4 .mod-bttv-r img { min-width: 112px; max-width: 112px; object-fit: contain; }
+
+.mod-bttv-l {
+  transform: rotate(-90deg);
+  display: inline-block;
+}
+
+.mod-bttv-r {
+  transform: rotate(90deg);
+  display: inline-block;
+}
+
+.mod-bttv-z img {
+  margin-left: -6px;
+}
+
+.mod-bttv-c {
+  filter: grayscale(1) brightness(.7) contrast(2.5)
+}
+
+.mod-bttv-p {
+  animation: bttv-p 1.5s linear infinite
+}
+
+@keyframes bttv-p {
+  0% {
+    filter: sepia(.5) hue-rotate(0deg) saturate(2.5)
+  }
+
+  to {
+    filter: sepia(.5) hue-rotate(1turn) saturate(2.5)
+  }
+}
+
+.mod-bttv-s {
+  animation: bttv-s .5s step-start infinite;
+  display: inline-block;
+}
+
+@keyframes bttv-s {
+  0% {
+    translate: 0 1px
+  }
+
+  10% {
+    translate: 2px 0
+  }
+
+  20% {
+    translate: 1px -2px
+  }
+
+  30% {
+    translate: -2px 1px
+  }
+
+  40% {
+    translate: 0 -1px
+  }
+
+  50% {
+    translate: 2px 2px
+  }
+
+  60% {
+    translate: -1px -1px
+  }
+
+  70% {
+    translate: -2px 2px
+  }
+
+  80% {
+    translate: 2px 1px
+  }
+
+  90% {
+    translate: -1px -2px
+  }
+
+  to {
+    translate: 1px 0
+  }
+}
