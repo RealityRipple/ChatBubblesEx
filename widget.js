@@ -728,7 +728,6 @@ function onEventFollow(event) {
       nick: event.data.username,
       msgId: event.activityId,
       badges: [],
-      isAction: true,
     },
   }
   onMessage(evRet)
@@ -748,7 +747,6 @@ function onEventSub(event) {
       nick: event.data.username,
       msgId: event.activityId,
       badges: [],
-      isAction: true,
     },
   }
   let tier = ''
@@ -789,7 +787,6 @@ function onEventGiftSub(event) {
       nick: event.data.sender,
       msgId: event.activityId,
       badges: [],
-      isAction: true,
     },
   }
   if (event.data.hasOwnProperty('message') && event.data.message !== '') {
@@ -824,7 +821,6 @@ function onEventBulkGiftSub(event) {
       nick: event.data.username,
       msgId: event.activityId,
       badges: [],
-      isAction: true,
     },
   }
   let tier = ''
@@ -855,7 +851,6 @@ function onEventRaid(event) {
       nick: event.data.username,
       msgId: event.activityId,
       badges: [],
-      isAction: true,
     },
   }
   if (event.data.amount > 1)
