@@ -651,6 +651,8 @@ main.direction-top main.random-mode {
 
 .action .text {
   font-style: italic;
+  color: #fff;
+  text-shadow: -2px -2px 0 var(--userColor), 2px -2px 0 var(--userColor), -2px 2px 0 var(--userColor), 2px 2px 0 var(--userColor);
 }
 
 .action .emote {
