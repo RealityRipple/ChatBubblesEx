@@ -962,10 +962,6 @@ main.direction-top main.random-mode {
   display: inline-block;
 }
 
-.mod-bttv-z img {
-  margin-left: -6px;
-}
-
 .mod-bttv-c {
   filter: grayscale(1) brightness(.7) contrast(2.5)
 }
