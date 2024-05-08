@@ -328,6 +328,22 @@
       "rtl": "Right to Left"
     }
   },
+  "emojiFont": {
+    "label": "Emoji Font",
+    "group": "Text Styles",
+    "type": "dropdown",
+    "value": "twemoji",
+    "options": {
+      "twemoji": "Twemoji",
+      "openmoji": "OpenMoji",
+      "noto": "Noto Color Emoji",
+      "blob": "Blobmoji",
+      "facebook": "Facebook Emoji",
+      "apple": "Apple Color Emoji",
+      "joypixels": "JoyPixels",
+      "tossface": "Toss Face"
+    }
+  },
   "useCustomBorderColorsLabel": {
     "label": "Use Custom Border/Name Colors?",
     "group": "Custom Colors",

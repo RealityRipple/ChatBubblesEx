@@ -31,6 +31,7 @@ const Widget = {
   globalEmotes: {},
   zweEmotes: {},
   modEmotes: {},
+  emojis: {}
 }
 
 const PRONOUNS_API_BASE = 'https://pronouns.alejo.io/api'
@@ -162,6 +163,32 @@ const MODIFIER_EMOTES = {
   },
 }
 
+const EMOJIS = {
+  api: 'https://cdn.jsdelivr.net/gh/realityripple/emoji/list.min.json',
+  transformer: response => {
+    const unqSkip = ['00a9', '00ae', '2122', '24c2']
+    const emojiData = {}
+    const eURL = 'https://cdn.jsdelivr.net/gh/realityripple/emoji/%SET_ID%/%EMOJI_ID%.png'
+    let set = FieldData.emojiFont
+    if (!set)
+      set = 'twemoji'
+    for (const id in response) {
+      if (!response.hasOwnProperty(id))
+        continue
+      if (response[id].hasOwnProperty('t')) {
+        if (response[id].hasOwnProperty('s') && response[id].s === -1 && unqSkip.includes(id))
+          continue
+        const u = eURL.replaceAll('%SET_ID%', set).replaceAll('%EMOJI_ID%', response[id].t)
+        emojiData[response[id].t] = u
+        continue
+      }
+      const u = eURL.replaceAll('%SET_ID%', set).replaceAll('%EMOJI_ID%', id)
+      emojiData[id] = u
+    }
+    return emojiData
+  },
+}
+
 // ---------------------------
 //    Widget Initialization
 // ---------------------------
@@ -172,6 +199,7 @@ window.addEventListener('onWidgetLoad', async obj => {
   loadGlobalEmotes()
   loadZWEEmotes()
   loadModEmotes()
+  loadEmojis()
 
   const { isEditorMode } = await SE_API.getOverlayStatus()
   conditionalMainClass('editor', isEditorMode)
@@ -376,6 +404,14 @@ async function loadModEmotes() {
   }
 }
 
+async function loadEmojis() {
+  const { api, transformer } = EMOJIS
+  const response = await get(api)
+  if (response != null) {
+    Widget.emojis = transformer(response)
+  }
+}
+
 // --------------------
 //    Event Handlers
 // --------------------
@@ -498,6 +534,17 @@ async function onMessage(event, testMessage = false) {
 
   const messageType = getMessageType(event.data)
   if (FieldData.highlightOnly && messageType !== 'highlight') return
+
+  for (let i = emotes.length - 1; i >= 0; i--) {
+    if (emotes[i].type !== 'emoji')
+      continue
+    emotes.splice(i, 1)
+  }
+  const newEmotes = emojiFind(text)
+  if (newEmotes.length > 0) {
+    emotes.push(...newEmotes)
+    emotes.sort((a, b) => a.start - b.start)
+  }
 
   const parsedText = parse(htmlEncode(text), emotes)
   const emoteSize = calcEmoteSize(parsedText)
@@ -1340,8 +1387,11 @@ function getSound(nick, name, badges, messageType) {
 }
 
 function parse(text, emotes) {
-  const filteredEmotes = emotes.filter(emote => {
+  const filteredAll = emotes.filter(emote => {
     const { name, type } = emote
+
+    if (type === 'emoji')
+      return true
 
     if (
       (type === 'ffz' && FieldData.ffzGlobal) ||
@@ -1356,11 +1406,32 @@ function parse(text, emotes) {
     return !globalEmotes.includes(name)
   })
 
-  if (!filteredEmotes || filteredEmotes.length === 0) {
+  const filteredEmotes = emotes.filter(emote => {
+    const { name, type } = emote
+
+    if (type === 'emoji')
+      return false
+
+    if (
+      (type === 'ffz' && FieldData.ffzGlobal) ||
+      (type === 'bttv' && FieldData.bttvGlobal) ||
+      (type === '7tv' && FieldData['7tvGlobal'])
+    )
+      return true
+
+    const globalEmotes = Widget.globalEmotes[type]
+    if (!globalEmotes) return true
+
+    return !globalEmotes.includes(name)
+  })
+
+  const filteredEmojis = emotes.filter(emote => (emote.type === 'emoji'))
+
+  if ((!filteredEmotes || filteredEmotes.length === 0) && (!filteredEmojis || filteredEmojis.length === 0)) {
     return [{ type: 'text', data: text }]
   }
 
-  const regex = createRegex(filteredEmotes.map(e => htmlEncode(e.name)))
+  const regex = createRegex(filteredEmotes.map(e => htmlEncode(e.name)), filteredEmojis.map(e => e.name))
 
   const textObjs = text
     .split(regex)
@@ -1368,7 +1439,7 @@ function parse(text, emotes) {
   const last = textObjs.pop()
 
   const parsedText = textObjs.reduce((acc, textObj, index) => {
-    const emoteData = filteredEmotes[index]
+    const emoteData = filteredAll[index]
     let eT = 'emote'
     
     const zweEmotes = Widget.zweEmotes[emoteData.type]
@@ -1399,16 +1470,131 @@ function calcEmoteSize(parsedText) {
   return 4
 }
 
+
+const emojiFind = function() {
+  const _sus = '0d9e'
+  const crewSVG = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><style type="text/css">') + '%CSS%' + encodeURIComponent('</style><ellipse cx="533.9" cy="929.8" rx="295.8" ry="39.4" class="st0"/><path d="M812 403c25-28 39-63 36-98-3-41-29-80-72-111l-16-11a193 193 0 0 0-77-105c-34-21-70-31-102-39-18-5-33-4-46-3h-24c-37-5-74 3-108 24-31 19-58 47-76 79-25 44-35 93-41 140l-25 1c-27 0-60 0-84 26-20 23-21 53-22 73-3 73-5 150-3 225 1 44 6 89 39 120 26 24 59 30 89 30l10-1 6 60c4 25 8 49 21 71a113 113 0 0 0 116 51c46-8 84-45 94-90 5-22 3-43 2-62l-1-24h33c-8 44 7 91 40 120a115 115 0 0 0 87 27c31-3 57-17 75-39 19-24 26-54 31-82 21-126 28-254 18-382z"/><path d="m760 495-1-52c-20 10-44 18-72 24-26 6-50 9-73 9a184 184 0 0 1-179-123c-14-42-12-91 7-133 20-45 69-58 99-66 46-13 94-13 140-3-9-10-19-20-29-25-26-17-57-26-85-33-9-2-17-1-28-1-11 1-22 2-37 0-53-8-103 33-126 75l-4 6c-25 50-31 109-35 165-9 156-4 313 15 468 3 19 5 37 13 50 11 18 36 28 58 24 23-4 44-24 49-47 4-14 2-29 1-46-1-19-3-40 2-62 3-12 13-21 26-22h2c23 0 135-1 190-5 0 0-28 52-74 59-9 28-2 62 19 80 11 10 28 15 45 13 15-1 28-8 36-18 11-14 15-34 19-56 16-93 24-187 22-281zm-482-99 3-60h-20c-22 0-36 1-43 8-6 8-7 25-7 37l-1 18c-2 68-4 137-3 204 1 32 5 63 22 80 14 12 34 15 56 15-8-101-10-201-7-302z" class="st1"/><path d="M792 322c-3 20-15 40-33 55-20 16-47 27-84 36-42 9-75 10-103 2-38-12-70-42-83-80-11-29-9-63 4-92l6-9c7-8 21-17 57-26a230 230 0 0 1 188 32c39 28 47 55 48 69v13z" class="st2"/><path d="M285 698c-22 0-42-3-56-15-17-17-21-48-21-80-2-67 0-136 2-204 20-8 45-7 68-3-3 101-1 201 7 302zm475-203c-15 58-56 109-111 133-73 32-165 11-215-49-32-39-45-90-54-140-15-87-18-177-8-266-25 50-31 109-35 165-9 156-4 313 15 468 3 19 5 37 13 50 11 18 36 28 58 24 23-4 44-24 49-47 4-14 2-29 1-46-1-19-3-40 2-62 3-12 13-21 26-22h2c23 0 135-1 190-5 0 0-28 52-74 59-9 28-2 62 19 80 11 10 28 15 45 13 15-1 28-8 36-18 11-14 15-34 19-56 16-93 24-187 22-281z" class="st3"/><path d="M792 322c-3 20-15 40-33 55-20 16-47 27-84 36-42 9-75 10-103 2-38-12-70-42-83-80-11-29-9-63 4-92l6-9c7 11 13 40 18 49 10 17 26 33 44 44 38 23 84 28 128 22 35-4 69-15 103-27z" class="st4"/><path d="M614 274c-7-3-13-9-13-17-1-11 11-18 21-22 30-10 63-8 91 3 9 4 17 9 18 18 1 10-9 18-19 19s-20-3-29-4c-23-4-45 11-69 3z" class="st5"/></svg>')
+  const crewColors = [['C51111', '300060'], ['132FD2', '00004A'], ['10802D', '021B2E'], ['ED53B9', '6B05A1'], ['EF7D0E', '730020'], ['F5F558', '8E1800'], ['3F484E', '000000'], ['D5E0EF', '2E4A8D'], ['6B30BC', '0E003C'], ['72491E', '4A040A'], ['39FEDB', '1054A1'], ['50EF3A', '006144'], ['938877', '14000A'], ['E27060', '983262'], ['F5E4A5', 'B89268'], ['F1C6D0', 'DA749C'], ['738593', '162638'], ['761E1C', '4A102C']]
+
+  function $c_emoji(msg) {
+    const emSeg = /((?:[\p{EPres}\p{ExtPict}]\ufe0f?\u200d?)+)+/gu
+    const emList = []
+    let match = ''
+    while ((match = emSeg.exec(msg)) !== null) {
+      emList.push(match)
+    }
+    const kcSeg = /((?:[0-9#\*]\ufe0f?\u20e3)+)+/gu
+    match = ''
+    while ((match = kcSeg.exec(msg)) !== null) {
+      emList.push(match)
+    }
+    const acSeg = /(\u0d9e)/gu
+    match = ''
+    while ((match = acSeg.exec(msg)) !== null) {
+      emList.push(match)
+    }
+    if (emList.length === 0)
+      return []
+    const rets = []
+    for (let i = 0, l = emList.length; i < l; i++) {
+      rets.push(..._parseEm(emList[i]))
+    }
+    return rets
+  }
+
+  function _parseEm(emI) {
+    const ret = []
+    const cpList = []
+    for (const c of emI[0]) {
+      const p = c.codePointAt(0).toString(16).padStart(4, '0')
+      if (cpList.length === 0) {
+        cpList.push(p)
+        continue
+      }
+      const lL = cpList.length - 1
+      if (p === 'fe0f')
+        cpList[lL] += '-' + p
+      else if (p === '200d')
+        cpList[lL] += '-' + p
+      else if (p === '20e3')
+        cpList[lL] += '-' + p
+      else if (p.match(/1f3f[b-f]/))
+        cpList[lL] += '-' + p
+      else if (p.match(/1f9b[0-3]/)) {
+       if (cpList[lL].slice(-5) === '-200d')
+         cpList[lL] += '-' + p
+       else
+         cpList[lL] += '-200d-' + p
+      }
+      else if (p.match(/264[0|2]/) || p.match(/26a7/)) {
+        if (cpList[lL].slice(-5) === '-200d')
+          cpList[lL] += '-' + p
+        else
+          cpList[lL] += '-200d-' + p
+      }
+      else if (p.match(/1f1((e[6-9a-f])|(f[0-9a-f]))/) && cpList[lL].match(/1f1((e[6-9a-f])|(f[0-9a-f]))/) && cpList[lL].length < 11)
+        cpList[lL] += '-' + p
+      else if (p === '1f308' && cpList[lL] === '1f3f3-fe0f')
+        cpList[lL] += '-200d-' + p
+      else if (p === '2620' && cpList[lL] === '1f3f4')
+        cpList[lL] += '-200d-' + p
+      else if (cpList[lL].slice(-5) === '-200d')
+        cpList[lL] += '-' + p
+      else
+        cpList.push(p)
+    }
+    let pos = emI.index
+    for (let j = 0, lP = cpList.length; j < lP; j++) {
+      let s = cpList[j]
+      let len = 1 + s.replaceAll(/[^\-]/g, '').length
+      if (s === _sus) {
+        const svgC = Math.floor(Math.random() * 18)
+        const svgCSS = '.st0{fill:#484C4D;}.st1{fill:#' + crewColors[svgC][0] + ';}.st2{fill:#A3D3E3;}.st3{opacity:0.5;fill:#' + crewColors[svgC][1] + ';}.st4{opacity:0.45;fill:#5B7882;}.st5{fill:#FFFFFF;}' + (Math.random() < 0.5 ? 'svg{transform: scaleX(-1);}' : '')
+        const crew = crewSVG.replace('%CSS%', encodeURIComponent(svgCSS))
+        ret.push({name: _chrStr(s), id: s, urls: {1: crew, 2: crew, 4: crew}, type: 'emoji', gif: false, start: pos, end: pos + len})
+        pos += len
+        continue
+      }
+      if (Widget.emojis.hasOwnProperty(s))
+        ret.push({name: _chrStr(s), id: s, urls: {1: Widget.emojis[s], 2: Widget.emojis[s], 4: Widget.emojis[s]}, type: 'emoji', gif: false, start: pos, end: pos + len})
+      pos += len
+    }
+    return ret
+  }
+
+  function _chrStr(s) {
+    let r = ''
+    const x = s.split('-')
+    for (let i = 0, l = x.length; i < l; i++) {
+      r += String.fromCodePoint(parseInt(x[i], 16))
+    }
+    return r
+  }
+
+  return $c_emoji
+}()
+
+
 // I have no idea how this works anymore but it does
 // Regex is so useful but it's so confusing
 // This is all to parse out the emote text
-const createRegex = strings => {
+const createRegex = (strings, emojis) => {
   const regexStrings = strings
     .sort()
     .reverse()
     .map(string => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-  const regex = `(?<=\\s|^)(?:${regexStrings.join('|')})(?=\\s|$|[.,!])`
-  return new RegExp(regex, 'g')
+  let regex = ''
+  let flags = 'g'
+  if (strings.length > 0) {
+    regex += `(?<=\\s|^)(?:${regexStrings.join('|')})(?=\\s|$|[.,!])`
+  }
+  if (emojis.length > 0) {
+    if (regex !== '')
+      regex += '|'
+    regex += `(?:${emojis.join('|')})`
+    flags += 'u'
+  }
+  return new RegExp(regex, flags)
 }
 
 function generateColor(name) {
