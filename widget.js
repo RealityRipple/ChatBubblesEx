@@ -31,6 +31,7 @@ const Widget = {
   globalEmotes: {},
   zweEmotes: {},
   modEmotes: {},
+  modEmotesU: {},
   emojis: {}
 }
 
@@ -135,7 +136,7 @@ const MODIFIER_EMOTES = {
   ffz: {
     api: 'https://api2.frankerfacez.com/v1/set/global',
     transformer: response => {
-      const { default_sets, sets } = response
+      const { default_sets, sets, users } = response
       const emoteNames = []
       for (const set of default_sets) {
         const { emoticons } = sets[set]
@@ -157,6 +158,30 @@ const MODIFIER_EMOTES = {
         if (!emote.modifier)
           continue
         emoteNames.push(emote.code)
+      }
+      return emoteNames
+    },
+  },
+}
+
+const USER_MODIFIER_EMOTES = {
+  ffz: {
+    api: 'https://api2.frankerfacez.com/v1/set/global',
+    transformer: response => {
+      const { sets, users } = response
+      const emoteNames = {}
+      for (const set in users) {
+        if (!users.hasOwnProperty(set))
+          continue
+        const { emoticons } = sets[set]
+        for (const user of users[set]) {
+          emoteNames[user] = []
+          for (const emote of emoticons) {
+            if (!emote.modifier)
+              continue
+            emoteNames[user].push(emote.name)
+          }
+        }
       }
       return emoteNames
     },
@@ -199,6 +224,7 @@ window.addEventListener('onWidgetLoad', async obj => {
   loadGlobalEmotes()
   loadZWEEmotes()
   loadModEmotes()
+  loadUserModEmotes()
   loadEmojis()
 
   const { isEditorMode } = await SE_API.getOverlayStatus()
@@ -404,6 +430,16 @@ async function loadModEmotes() {
   }
 }
 
+async function loadUserModEmotes() {
+  for (const [key, value] of Object.entries(USER_MODIFIER_EMOTES)) {
+    const { api, transformer } = value
+    const response = await get(api)
+    if (response != null) {
+      Widget.modEmotesU[key] = transformer(response)
+    }
+  }
+}
+
 async function loadEmojis() {
   const { api, transformer } = EMOJIS
   const response = await get(api)
@@ -546,7 +582,8 @@ async function onMessage(event, testMessage = false) {
     emotes.sort((a, b) => a.start - b.start)
   }
 
-  const parsedText = parse(htmlEncode(text), emotes)
+  const parsedText = parse(htmlEncode(text), emotes, username)
+
   const emoteSize = calcEmoteSize(parsedText)
   if (FieldData.emoteOnly && emoteSize === 1) return
 
@@ -1437,7 +1474,7 @@ function getSound(nick, name, badges, messageType) {
   return null
 }
 
-function parse(text, emotes) {
+function parse(text, emotes, usr) {
   const filteredAll = emotes.filter(emote => {
     const { name, type } = emote
 
@@ -1499,6 +1536,10 @@ function parse(text, emotes) {
     
     const modEmotes = Widget.modEmotes[emoteData.type]
     if (!!modEmotes && modEmotes.includes(emoteData.name))
+     eT = 'modifier'
+    
+    const modEmotesU = Widget.modEmotesU[emoteData.type]
+    if (!!modEmotesU && modEmotesU.hasOwnProperty(usr) && modEmotesU[usr].includes(emoteData.name))
      eT = 'modifier'
     
     return [...acc, textObj, { type: eT, data: emoteData }]
