@@ -811,11 +811,6 @@ function onEventSub(event) {
     evRet.data.displayName = 'New Sub'
   }
   onMessage(evRet)
-  if (event.data.hasOwnProperty('message') && event.data.message !== '') {
-    evRet.data.displayName = event.data.displayName
-    evRet.data.text = event.data.message
-    onMessage(evRet)
-  }
 }
 
 function onEventGiftSub(event) {
