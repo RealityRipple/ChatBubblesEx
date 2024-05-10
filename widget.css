@@ -981,52 +981,180 @@ main.direction-top main.random-mode {
 }
 
 .mod-bttv-s {
-  animation: bttv-s .5s step-start infinite;
   display: inline-block;
+  position: relative;
 }
+.emote-1 .mod-bttv-s { animation: bttv-s1 .5s step-start infinite; }
+.emote-2 .mod-bttv-s { animation: bttv-s2 .5s step-start infinite; }
+.emote-4 .mod-bttv-s { animation: bttv-s4 .5s step-start infinite; }
 
-@keyframes bttv-s {
+@keyframes bttv-s1 {
   0% {
-    translate: 0 1px
+    top: 0;
+    left: 1px;
   }
 
   10% {
-    translate: 2px 0
+    top: 2px;
+    left: 0;
   }
 
   20% {
-    translate: 1px -2px
+    top: 1px;
+    left: -2px;
   }
 
   30% {
-    translate: -2px 1px
+    top: -2px;
+    left: 1px;
   }
 
   40% {
-    translate: 0 -1px
+    top: 0;
+    left: -1px;
   }
 
   50% {
-    translate: 2px 2px
+    top: 2px;
+    left: 2px;
   }
 
   60% {
-    translate: -1px -1px
+    top: -1px;
+    left: -1px;
   }
 
   70% {
-    translate: -2px 2px
+    top: -2px;
+    left: 2px;
   }
 
   80% {
-    translate: 2px 1px
+    top: 2px;
+    left: 1px;
   }
 
   90% {
-    translate: -1px -2px
+    top: -1px;
+    left: -2px;
   }
 
   to {
-    translate: 1px 0
+    top: 1px;
+    left: 0;
+  }
+}
+
+@keyframes bttv-s2 {
+  0% {
+    top: 0;
+    left: 2px;
+  }
+
+  10% {
+    top: 4px;
+    left: 0;
+  }
+
+  20% {
+    top: 2px;
+    left: -4px;
+  }
+
+  30% {
+    top: -4px;
+    left: 2px;
+  }
+
+  40% {
+    top: 0;
+    left: -2px;
+  }
+
+  50% {
+    top: 4px;
+    left: 4px;
+  }
+
+  60% {
+    top: -2px;
+    left: -2px;
+  }
+
+  70% {
+    top: -4px;
+    left: 4px;
+  }
+
+  80% {
+    top: 4px;
+    left: 2px;
+  }
+
+  90% {
+    top: -2px;
+    left: -4px;
+  }
+
+  to {
+    top: 2px;
+    left: 0;
+  }
+}
+
+@keyframes bttv-s4 {
+  0% {
+    top: 0;
+    left: 4px;
+  }
+
+  10% {
+    top: 8px;
+    left: 0;
+  }
+
+  20% {
+    top: 4px;
+    left: -8px;
+  }
+
+  30% {
+    top: -8px;
+    left: 4px;
+  }
+
+  40% {
+    top: 0;
+    left: -4px;
+  }
+
+  50% {
+    top: 8px;
+    left: 8px;
+  }
+
+  60% {
+    top: -4px;
+    left: -4px;
+  }
+
+  70% {
+    top: -8px;
+    left: 8px;
+  }
+
+  80% {
+    top: 8px;
+    left: 4px;
+  }
+
+  90% {
+    top: -4px;
+    left: -8px;
+  }
+
+  to {
+    top: 4px;
+    left: 0;
   }
 }
